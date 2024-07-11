@@ -12,8 +12,4 @@
     <ShellContent
         ContentTemplate="{DataTemplate local:MainPage}"
         Route="MainPage" />
-
-    <ShellContent
-        ContentTemplate="{DataTemplate v:BluetoothCV}"
-        Route="BluetoothCV" />
 </Shell>
