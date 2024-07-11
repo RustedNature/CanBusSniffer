@@ -65,12 +65,20 @@
 	</ItemGroup>
 
 	<ItemGroup>
-	  <MauiXaml Update="Views\BluetoothCV.xaml">
+	  <Compile Update="Views\MainCV.xaml.cs">
+	    <DependentUpon>MainCV.xaml</DependentUpon>
+	  </Compile>
+	</ItemGroup>
+
+	<ItemGroup>
+	  <MauiXaml Update="Views\BluetoothPage.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
-	  <MauiXaml Update="Views\MainPageCV.xaml">
+	  <MauiXaml Update="Views\MainCV.xaml">
 	    <Generator>MSBuild:Compile</Generator>
 	  </MauiXaml>
 	</ItemGroup>
+
+	<ProjectExtensions><VisualStudio><UserProperties XamarinHotReloadDebuggerTimeoutExceptionCanBusSnifferHideInfoBar="True" /></VisualStudio></ProjectExtensions>
 
 </Project>

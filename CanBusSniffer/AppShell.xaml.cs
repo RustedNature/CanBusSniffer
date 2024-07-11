@@ -1,4 +1,5 @@
-﻿using CanBusSniffer.Views;
+﻿using CanBusSniffer.ViewModels;
+using CanBusSniffer.Views;
 
 namespace CanBusSniffer
 {
@@ -7,7 +8,7 @@ namespace CanBusSniffer
         public AppShell()
         {
             InitializeComponent();
-            Routing.RegisterRoute(nameof(BluetoothCV), typeof(BluetoothCV));
+            Routing.RegisterRoute(nameof(BluetoothPage), typeof(BluetoothPage));
         }
     }
 }
