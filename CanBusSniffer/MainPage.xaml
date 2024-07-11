@@ -6,9 +6,5 @@
              x:Class="CanBusSniffer.MainPage">
 
     <Grid>
-        <Grid.BindingContext>
-            <vm:MainPageVM />
-        </Grid.BindingContext>
-        <v:MainPageCV />
     </Grid>
 </ContentPage>
