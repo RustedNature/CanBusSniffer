@@ -16,13 +16,16 @@ namespace CanBusSniffer.Models
         {
             FrameID = frameID;
             DataLengthContent = dataLengthContent;
-            Data = data;
+            for (int i = 0; i < DataLengthContent; i++)
+            {
+                Data[i] = data[i];
+            }
         }
 
         public override string ToString()
         {
             string r = string.Empty;
-            r += ($"{FrameID:X}: ");
+            r += $"{FrameID:X}: ";
             for (int i = 0; i < DataLengthContent; i++)
             {
                 r += $"{Data[i]}";

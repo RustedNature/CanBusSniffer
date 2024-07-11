@@ -1,4 +1,6 @@
-﻿using Microsoft.Extensions.Logging;
+﻿using CanBusSniffer.ViewModels;
+using CanBusSniffer.Views;
+using Microsoft.Extensions.Logging;
 
 namespace CanBusSniffer
 {
@@ -16,7 +18,7 @@ namespace CanBusSniffer
                 });
 
 #if DEBUG
-    		builder.Logging.AddDebug();
+            builder.Logging.AddDebug();
 #endif
 
             return builder.Build();
