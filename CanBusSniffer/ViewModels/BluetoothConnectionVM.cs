@@ -21,27 +21,39 @@ namespace CanBusSniffer.ViewModels
         private readonly IAdapter adapter;
 
         [ObservableProperty]
-        private ObservableCollection<IDevice> devices = new();
+        private ObservableCollection<IDevice> discoveredBTDevices = new();
+
+        [ObservableProperty]
+        private string connectionStatus = string.Empty;
 
         [ObservableProperty]
         private bool isScanning = false;
+
+        [ObservableProperty]
+        private bool isConnecting = false;
 
         public BluetoothConnectionVM()
         {
             bluetoothLE = CrossBluetoothLE.Current;
             adapter = bluetoothLE.Adapter;
             adapter.DeviceDiscovered += Adapter_DeviceDiscovered;
+            adapter.DeviceConnected += Adapter_DeviceConnected;
         }
 
-        private async void Adapter_DeviceDiscovered(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
+        private void Adapter_DeviceConnected(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
         {
-            if (!Devices.Any(d => d.Id == e.Device.Id))
+            Debug.WriteLine($"{e.Device.Name} connected");
+        }
+
+        private void Adapter_DeviceDiscovered(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
+        {
+            if (!DiscoveredBTDevices.Any(d => d.Id == e.Device.Id))
             {
-                Devices.Add(e.Device);
+                DiscoveredBTDevices.Add(e.Device);
             }
         }
 
-        private static async Task<bool> RequestPermissions()
+        private static async Task<bool> RequestAndroidPermissions()
         {
             return await RequestLocationWhenInUse() && await RequestBluetooth();
         }
@@ -70,14 +82,16 @@ namespace CanBusSniffer.ViewModels
         [RelayCommand]
         public async Task NewScanAsync()
         {
-#if __ANDROID__ || ANDROID
-
-            if (!await RequestPermissions())
+            if (!bluetoothLE.IsOn)
             {
-                await Shell.Current.DisplayAlert("Need Permissons", "Please grant permission for Location when in use and Bluetooth at least", "Back");
+                await Shell.Current.DisplayAlert("Enable Bluetooth", "", "I will activate bluetooth");
                 return;
             }
-#endif
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                await RequestAndroidPermissions();
+            }
+
             if (IsScanning)
             {
                 return;
@@ -85,7 +99,7 @@ namespace CanBusSniffer.ViewModels
 
             IsScanning = true;
 
-            Devices.Clear();
+            DiscoveredBTDevices.Clear();
 
             try
             {
@@ -98,14 +112,34 @@ namespace CanBusSniffer.ViewModels
             finally
             {
                 IsScanning = false;
-                Debug.WriteLine($"Found {Devices.Count} devices");
+                Debug.WriteLine($"Found {DiscoveredBTDevices.Count} DiscoveredBTDevices");
             }
         }
 
         [RelayCommand]
-        public async void SelectDevice()
+        public async Task ConnectToDevice(IDevice d)
         {
-            throw new NotImplementedException();
+            string wantTo = await Shell.Current.DisplayPromptAsync("Connect", $"Do you want to connect to {d.Name}?");
+            if (IsConnecting && wantTo != "OK")
+            {
+                return;
+            }
+            try
+            {
+                IsConnecting = true;
+
+                await adapter.ConnectToDeviceAsync(d);
+                OnPropertyChanged(nameof(d.State));
+            }
+            catch (Exception e)
+            {
+                Debug.WriteLine(e.Message);
+                ConnectionStatus = "Connection failed";
+            }
+            finally
+            {
+                IsConnecting = !IsConnecting;
+            }
         }
     }
 }
