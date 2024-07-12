@@ -37,10 +37,9 @@
                             <TapGestureRecognizer Command="{Binding Source={RelativeSource AncestorType={x:Type vm:BluetoothConnectionVM}},Path=ConnectToDeviceCommand}"
                                                   CommandParameter="{Binding .}" />
                         </Frame.GestureRecognizers>
-                        <Grid ColumnDefinitions="*,*,*">
+                        <Grid ColumnDefinitions="*,*">
                             <Label Text="{Binding Name}" TextColor="White"   HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                             <Label Text="{Binding Id}" TextColor="White"  Grid.Column="1" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
-                            <Label Text="{Binding State}" TextColor="White"  Grid.Column="2" HorizontalTextAlignment="Center" VerticalTextAlignment="Center" />
                         </Grid>
                     </Frame>
                 </DataTemplate>
