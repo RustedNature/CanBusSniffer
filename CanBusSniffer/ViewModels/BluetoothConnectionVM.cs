@@ -1,4 +1,5 @@
-﻿using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CanBusSniffer.Service;
+using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
@@ -9,8 +10,7 @@ namespace CanBusSniffer.ViewModels
 {
     public partial class BluetoothConnectionVM : ObservableObject
     {
-        private readonly IBluetoothLE bluetoothLE;
-        private readonly IAdapter adapter;
+        private BluetoothService _bluetoothService;
 
         [ObservableProperty]
         private ObservableCollection<IDevice> discoveredBTDevices = new();
@@ -26,64 +26,37 @@ namespace CanBusSniffer.ViewModels
 
         public BluetoothConnectionVM()
         {
-            bluetoothLE = CrossBluetoothLE.Current;
-            adapter = bluetoothLE.Adapter;
-            adapter.DeviceDiscovered += Adapter_DeviceDiscovered;
-            adapter.DeviceConnected += Adapter_DeviceConnected;
+            _bluetoothService = new BluetoothService();
+            _bluetoothService.DeviceConnected += OnDeviceConnected;
+            _bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
         }
 
-        private void Adapter_DeviceConnected(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
+        private void OnDeviceConnected(object? sender, IDevice device)
         {
-            Debug.WriteLine($"{e.Device.Name} connected");
+            Debug.WriteLine($"{device.Name} connected");
         }
 
-        private void Adapter_DeviceDiscovered(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
+        private void OnDeviceDiscovered(object? sender, IDevice device)
         {
-            bool listDevice = !DiscoveredBTDevices.Any(d => d.Id == e.Device.Id || e.Device.Name is null || e.Device.Name.Length <= 0);
-            Debug.WriteLine($"List Device: {e.Device.Name} = {listDevice}");
+            bool listDevice = !DiscoveredBTDevices.Any(d => d.Id == device.Id || device.Name is null || device.Name.Length <= 0);
+            Debug.WriteLine($"List Device: {device.Name} = {listDevice}");
             if (listDevice)
             {
-                DiscoveredBTDevices.Add(e.Device);
+                DiscoveredBTDevices.Add(device);
             }
-        }
-
-        private static async Task<bool> RequestAndroidPermissions()
-        {
-            return await RequestLocationWhenInUsePermission() && await RequestBluetoothPermission();
-        }
-
-        private static async Task<bool> RequestBluetoothPermission()
-        {
-            var status = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
-            if (status != PermissionStatus.Granted)
-            {
-                status = await Permissions.RequestAsync<Permissions.Bluetooth>();
-            }
-            return status == PermissionStatus.Granted;
-        }
-
-        private static async Task<bool> RequestLocationWhenInUsePermission()
-        {
-            var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
-            if (status != PermissionStatus.Granted)
-            {
-                status = await Permissions.RequestAsync<Permissions.LocationWhenInUse>();
-            }
-
-            return status == PermissionStatus.Granted;
         }
 
         [RelayCommand]
         public async Task ScanAsync()
         {
-            if (!bluetoothLE.IsOn)
+            if (!_bluetoothService.IsBluetoothLEOn())
             {
                 await Shell.Current.DisplayAlert("Enable Bluetooth", "", "I will activate bluetooth");
                 return;
             }
             if (DeviceInfo.Platform == DevicePlatform.Android)
             {
-                await RequestAndroidPermissions();
+                await _bluetoothService.RequestAndroidPermissions();
             }
 
             if (IsScanning)
@@ -97,7 +70,7 @@ namespace CanBusSniffer.ViewModels
 
             try
             {
-                await adapter.StartScanningForDevicesAsync();
+                await _bluetoothService.ScanAsync();
             }
             catch (Exception ex)
             {
@@ -122,7 +95,7 @@ namespace CanBusSniffer.ViewModels
             {
                 IsConnecting = true;
 
-                await adapter.ConnectToDeviceAsync(d);
+                await _bluetoothService.ConnectToDeviceAsync(d);
                 OnPropertyChanged(nameof(d.State));
             }
             catch (Exception e)
