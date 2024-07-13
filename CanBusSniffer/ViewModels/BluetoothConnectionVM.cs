@@ -1,7 +1,6 @@
 ﻿using CanBusSniffer.Service;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
@@ -24,11 +23,13 @@ namespace CanBusSniffer.ViewModels
         [ObservableProperty]
         private bool isConnecting = false;
 
-        public BluetoothConnectionVM()
+        public BluetoothService BluetoothService { get => _bluetoothService; set => _bluetoothService = value; }
+
+        public BluetoothConnectionVM(BluetoothService bluetoothService)
         {
-            _bluetoothService = new BluetoothService();
-            _bluetoothService.DeviceConnected += OnDeviceConnected;
-            _bluetoothService.DeviceDiscovered += OnDeviceDiscovered;
+            BluetoothService = bluetoothService;
+            BluetoothService.DeviceConnected += OnDeviceConnected;
+            BluetoothService.DeviceDiscovered += OnDeviceDiscovered;
         }
 
         private void OnDeviceConnected(object? sender, IDevice device)
@@ -49,15 +50,8 @@ namespace CanBusSniffer.ViewModels
         [RelayCommand]
         public async Task ScanAsync()
         {
-            if (!_bluetoothService.IsBluetoothLEOn())
-            {
-                await Shell.Current.DisplayAlert("Enable Bluetooth", "", "I will activate bluetooth");
-                return;
-            }
-            if (DeviceInfo.Platform == DevicePlatform.Android)
-            {
-                await _bluetoothService.RequestAndroidPermissions();
-            }
+            await CheckIsBluetoothOn();
+            await CheckRequierdAndroidPermissions();
 
             if (IsScanning)
             {
@@ -70,7 +64,7 @@ namespace CanBusSniffer.ViewModels
 
             try
             {
-                await _bluetoothService.ScanAsync();
+                await BluetoothService.ScanAsync();
             }
             catch (Exception ex)
             {
@@ -83,11 +77,29 @@ namespace CanBusSniffer.ViewModels
             }
         }
 
+        private async Task CheckRequierdAndroidPermissions()
+        {
+            if (DeviceInfo.Platform == DevicePlatform.Android)
+            {
+                await BluetoothService.RequestAndroidPermissions();
+            }
+        }
+
+        private async Task CheckIsBluetoothOn()
+        {
+            if (!BluetoothService.IsBluetoothLEOn())
+            {
+                await Shell.Current.DisplayAlert("Enable Bluetooth", "", "I will activate bluetooth");
+                return;
+            }
+        }
+
         [RelayCommand]
         public async Task ConnectToDevice(IDevice d)
         {
-            string wantTo = await Shell.Current.DisplayPromptAsync("Connect", $"Do you want to connect to {d.Name}?");
-            if (IsConnecting && wantTo != "OK")
+            await StopDiscoverDevices();
+
+            if (IsConnecting)
             {
                 return;
             }
@@ -95,8 +107,7 @@ namespace CanBusSniffer.ViewModels
             {
                 IsConnecting = true;
 
-                await _bluetoothService.ConnectToDeviceAsync(d);
-                OnPropertyChanged(nameof(d.State));
+                await BluetoothService.ConnectToDeviceAsync(d);
             }
             catch (Exception e)
             {
@@ -106,6 +117,14 @@ namespace CanBusSniffer.ViewModels
             finally
             {
                 IsConnecting = !IsConnecting;
+            }
+        }
+
+        private async Task StopDiscoverDevices()
+        {
+            if (IsScanning)
+            {
+                await BluetoothService.StopScanAsync();
             }
         }
     }
