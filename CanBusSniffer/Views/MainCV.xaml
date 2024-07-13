@@ -3,9 +3,23 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CanBusSniffer.Views.MainCV"
              xmlns:viewmodel="clr-namespace:CanBusSniffer.ViewModels"
+            xmlns:m="clr-namespace:CanBusSniffer.Models"
              x:DataType="viewmodel:MainVM">
     <VerticalStackLayout>
-        <Label Text="{Binding Num}" />
+
         <Button Text="Blue" HorizontalOptions="End" Command="{Binding OpenBluetoothMenueCommand}" />
+
+        <CollectionView ItemsSource="{Binding CanFrames}">
+            <CollectionView.ItemsLayout>
+                <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
+            </CollectionView.ItemsLayout>
+            <CollectionView.ItemTemplate>
+                <DataTemplate x:DataType="m:CanFrame">
+                    <StackLayout>
+                        <Label Text="{Binding FrameID, StringFormat='0x{0:X}'}" TextColor="AntiqueWhite" />
+                    </StackLayout>
+                </DataTemplate>
+            </CollectionView.ItemTemplate>
+        </CollectionView>
     </VerticalStackLayout>
 </ContentView>
