@@ -1,17 +1,9 @@
-﻿using CanBusSniffer.Models;
-using CommunityToolkit.Mvvm.ComponentModel;
+﻿using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using Microsoft.Maui.Controls;
 using Plugin.BLE;
 using Plugin.BLE.Abstractions.Contracts;
-using System;
-using System.Collections.Generic;
 using System.Collections.ObjectModel;
-using System.ComponentModel;
 using System.Diagnostics;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace CanBusSniffer.ViewModels
 {
@@ -47,7 +39,9 @@ namespace CanBusSniffer.ViewModels
 
         private void Adapter_DeviceDiscovered(object? sender, Plugin.BLE.Abstractions.EventArgs.DeviceEventArgs e)
         {
-            if (!DiscoveredBTDevices.Any(d => d.Id == e.Device.Id))
+            bool listDevice = !DiscoveredBTDevices.Any(d => d.Id == e.Device.Id || e.Device.Name is null || e.Device.Name.Length <= 0);
+            Debug.WriteLine($"List Device: {e.Device.Name} = {listDevice}");
+            if (listDevice)
             {
                 DiscoveredBTDevices.Add(e.Device);
             }
@@ -55,10 +49,10 @@ namespace CanBusSniffer.ViewModels
 
         private static async Task<bool> RequestAndroidPermissions()
         {
-            return await RequestLocationWhenInUse() && await RequestBluetooth();
+            return await RequestLocationWhenInUsePermission() && await RequestBluetoothPermission();
         }
 
-        private static async Task<bool> RequestBluetooth()
+        private static async Task<bool> RequestBluetoothPermission()
         {
             var status = await Permissions.CheckStatusAsync<Permissions.Bluetooth>();
             if (status != PermissionStatus.Granted)
@@ -68,7 +62,7 @@ namespace CanBusSniffer.ViewModels
             return status == PermissionStatus.Granted;
         }
 
-        private static async Task<bool> RequestLocationWhenInUse()
+        private static async Task<bool> RequestLocationWhenInUsePermission()
         {
             var status = await Permissions.CheckStatusAsync<Permissions.LocationWhenInUse>();
             if (status != PermissionStatus.Granted)
@@ -80,7 +74,7 @@ namespace CanBusSniffer.ViewModels
         }
 
         [RelayCommand]
-        public async Task NewScanAsync()
+        public async Task ScanAsync()
         {
             if (!bluetoothLE.IsOn)
             {
