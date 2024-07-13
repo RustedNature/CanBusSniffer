@@ -1,16 +1,17 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
+﻿using Newtonsoft.Json;
 
 namespace CanBusSniffer.Models
 {
-    internal class CanFrame
+    public class CanFrame
     {
-        public int FrameID { get; set; }
+        [JsonProperty("id")]
+        public long FrameID { get; set; }
+
+        [JsonProperty("dlc")]
         public int DataLengthContent { get; set; }
-        public byte[] Data { get; set; } = new byte[8];
+
+        [JsonProperty("data")]
+        public List<byte> Data { get; set; } = new();
 
         public CanFrame(int frameID, int dataLengthContent, byte[] data)
         {
@@ -22,16 +23,18 @@ namespace CanBusSniffer.Models
             }
         }
 
+        public CanFrame()
+        {
+        }
+
         public override string ToString()
         {
             string r = string.Empty;
-            r += $"{FrameID:X}: ";
+            r += $"ID: 0x{FrameID:X} Data: ";
             for (int i = 0; i < DataLengthContent; i++)
             {
-                r += $"{Data[i]}";
+                r += $"{Data[i]:X} ";
             }
-
-            r += "\n";
 
             return r;
         }
