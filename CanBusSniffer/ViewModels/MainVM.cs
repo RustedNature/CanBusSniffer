@@ -18,16 +18,25 @@ namespace CanBusSniffer.ViewModels
         public MainVM(BluetoothService bluetoothService)
         {
             BluetoothService = bluetoothService;
-            BluetoothService.CanFrameParsed += OnCanFrameParsed;
+            BluetoothService.CanFrameBatchParsed += OnCanFrameParsed;
         }
 
-        private void OnCanFrameParsed(object? sender, CanFrame e)
+        private void OnCanFrameParsed(object? sender, List<CanFrame> frames)
         {
-            
-                CanFrames.Add(e);
-                Debug.WriteLine("CAN Frame parsed and added to collection");
-           
+
+
+            // Update the UI thread in batches
+            MainThread.BeginInvokeOnMainThread(() =>
+            {
+                foreach (var frame in frames)
+                {
+                    CanFrames.Add(frame);
+                }
+            });
+
         }
+
+
 
         [RelayCommand]
         private async Task OpenBluetoothMenueAsync() => await Shell.Current.GoToAsync(nameof(BluetoothPage));

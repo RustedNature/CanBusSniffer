@@ -10,13 +10,16 @@ namespace CanBusSniffer.Service
 {
     public class BluetoothService
     {
+        private const int BatchIntervalsMs = 1000;
         private readonly IBluetoothLE _bluetoothLE;
         private readonly IAdapter _adapter;
+        private readonly System.Timers.Timer _batchTimer;
+        private readonly object _batchLock = new();
+        private readonly List<CanFrame> _canFrameBatch = new();
         private IDevice? _connectedDevice;
         private ICharacteristic _characteristic;
 
         public IBluetoothLE BluetoothLE => _bluetoothLE;
-
         public IAdapter Adapter => _adapter;
 
         public IDevice? ConnectedDevice { get => _connectedDevice; set => _connectedDevice = value; }
@@ -28,14 +31,27 @@ namespace CanBusSniffer.Service
 
         public event EventHandler<string> DataReceived;
 
-        public event EventHandler<CanFrame> CanFrameParsed;
+        public event EventHandler<List<CanFrame>> CanFrameBatchParsed;
 
         public BluetoothService()
         {
+            _batchTimer = new System.Timers.Timer(BatchIntervalsMs);
+            _batchTimer.Elapsed += OnBatchTimerElapsed;
             _bluetoothLE = CrossBluetoothLE.Current;
             _adapter = BluetoothLE.Adapter;
             _adapter.DeviceDiscovered += OnDeviceDiscovered;
             _adapter.DeviceConnected += OnDeviceConnected;
+        }
+
+        private void OnBatchTimerElapsed(object? sender, System.Timers.ElapsedEventArgs e)
+        {
+            List<CanFrame> canFrames = null;
+            lock (_batchLock)
+            {
+                canFrames = new(_canFrameBatch);
+                _canFrameBatch.Clear();
+            }
+            CanFrameBatchParsed?.Invoke(sender, canFrames);
         }
 
         public async Task ScanAsync() => await Adapter.StartScanningForDevicesAsync();
@@ -123,6 +139,10 @@ namespace CanBusSniffer.Service
 
         public async Task StartReceivingData()
         {
+            if (!_batchTimer.Enabled)
+            {
+                _batchTimer.Start();
+            }
             if (Characteristic == null)
             {
                 throw new InvalidOperationException("No readable characteristic found");
@@ -144,14 +164,24 @@ namespace CanBusSniffer.Service
             {
                 CanFrame frame = JsonConvert.DeserializeObject<CanFrame>(frameData)!;
                 Debug.WriteLine($"Successfully parsed: {frame}");
-
-                CanFrameParsed.Invoke(this, frame);
+                lock (_batchLock)
+                {
+                    _canFrameBatch.Add(frame);
+                }
             }
             catch (Exception e)
             {
                 Debug.WriteLine($"Error parsing CAN frame: {e.Message}");
                 Debug.WriteLine($"Stack trace: {e.StackTrace}");
             }
+        }
+
+        private async void Cleanup()
+        {
+            await StopReceivingData();
+            await CloseConnection();
+            _batchTimer.Stop();
+            _batchTimer.Elapsed -= OnBatchTimerElapsed;
         }
     }
 }

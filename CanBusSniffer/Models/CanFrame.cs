@@ -5,7 +5,7 @@ namespace CanBusSniffer.Models
     public class CanFrame
     {
         [JsonProperty("id")]
-        public long FrameID { get; set; }
+        public uint FrameID { get; set; }
 
         [JsonProperty("dlc")]
         public int DataLengthContent { get; set; }
@@ -13,7 +13,7 @@ namespace CanBusSniffer.Models
         [JsonProperty("data")]
         public List<byte> Data { get; set; } = new();
 
-        public CanFrame(int frameID, int dataLengthContent, byte[] data)
+        public CanFrame(uint frameID, int dataLengthContent, byte[] data)
         {
             FrameID = frameID;
             DataLengthContent = dataLengthContent;

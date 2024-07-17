@@ -9,8 +9,6 @@ namespace CanBusSniffer.ViewModels
 {
     public partial class BluetoothConnectionVM : ObservableObject
     {
-        private BluetoothService _bluetoothService;
-
         [ObservableProperty]
         private ObservableCollection<IDevice> discoveredBTDevices = new();
 
@@ -23,7 +21,7 @@ namespace CanBusSniffer.ViewModels
         [ObservableProperty]
         private bool isConnecting = false;
 
-        public BluetoothService BluetoothService { get => _bluetoothService; set => _bluetoothService = value; }
+        public BluetoothService BluetoothService { get; }
 
         public BluetoothConnectionVM(BluetoothService bluetoothService)
         {
