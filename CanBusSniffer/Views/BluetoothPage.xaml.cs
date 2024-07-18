@@ -4,7 +4,7 @@ namespace CanBusSniffer.Views;
 
 public partial class BluetoothPage : ContentPage
 {
-    public BluetoothPage(BluetoothConnectionVM vm)
+    public BluetoothPage(BluetoothConnectionVm vm)
     {
         InitializeComponent();
         BindingContext = vm;

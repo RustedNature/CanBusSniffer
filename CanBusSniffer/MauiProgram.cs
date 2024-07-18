@@ -17,9 +17,9 @@ namespace CanBusSniffer
                     fonts.AddFont("OpenSans-Regular.ttf", "OpenSansRegular");
                     fonts.AddFont("OpenSans-Semibold.ttf", "OpenSansSemibold");
                 });
-            builder.Services.AddSingleton<MainVM>();
-            builder.Services.AddTransient<MainCV>();
-            builder.Services.AddTransient<BluetoothConnectionVM>();
+            builder.Services.AddSingleton<MainVm>();
+            builder.Services.AddTransient<MainCv>();
+            builder.Services.AddTransient<BluetoothConnectionVm>();
             builder.Services.AddTransient<BluetoothPage>();
             builder.Services.AddTransient<MainPage>();
             builder.Services.AddSingleton<BluetoothService>();

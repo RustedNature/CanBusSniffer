@@ -1,42 +1,32 @@
 ﻿using Newtonsoft.Json;
 
-namespace CanBusSniffer.Models
+namespace CanBusSniffer.Models;
+
+public class CanFrame
 {
-    public class CanFrame
+    public CanFrame(uint frameID, int dataLengthContent, byte[] data)
     {
-        [JsonProperty("id")]
-        public uint FrameID { get; set; }
+        FrameID = frameID;
+        DataLengthContent = dataLengthContent;
+        for (var i = 0; i < DataLengthContent; i++) Data[i] = data[i];
+    }
 
-        [JsonProperty("dlc")]
-        public int DataLengthContent { get; set; }
+    public CanFrame()
+    {
+    }
 
-        [JsonProperty("data")]
-        public List<byte> Data { get; set; } = new();
+    [JsonProperty("id")] public uint FrameID { get; set; }
 
-        public CanFrame(uint frameID, int dataLengthContent, byte[] data)
-        {
-            FrameID = frameID;
-            DataLengthContent = dataLengthContent;
-            for (int i = 0; i < DataLengthContent; i++)
-            {
-                Data[i] = data[i];
-            }
-        }
+    [JsonProperty("dlc")] public int DataLengthContent { get; set; }
 
-        public CanFrame()
-        {
-        }
+    [JsonProperty("data")] public List<byte> Data { get; set; } = new();
 
-        public override string ToString()
-        {
-            string r = string.Empty;
-            r += $"ID: 0x{FrameID:X} Data: ";
-            for (int i = 0; i < DataLengthContent; i++)
-            {
-                r += $"{Data[i]:X} ";
-            }
+    public override string ToString()
+    {
+        var r = string.Empty;
+        r += $"ID: 0x{FrameID:X} Data: ";
+        for (var i = 0; i < DataLengthContent; i++) r += $"{Data[i]:X} ";
 
-            return r;
-        }
+        return r;
     }
 }

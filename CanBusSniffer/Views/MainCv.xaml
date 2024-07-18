@@ -1,13 +1,14 @@
-<?xml version="1.0" encoding="utf-8" ?>
+<?xml version="1.0" encoding="utf-8"?>
+
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
-             x:Class="CanBusSniffer.Views.MainCV"
+             x:Class="CanBusSniffer.Views.MainCv"
              xmlns:viewmodel="clr-namespace:CanBusSniffer.ViewModels"
-            xmlns:m="clr-namespace:CanBusSniffer.Models"
-             x:DataType="viewmodel:MainVM">
+             xmlns:m="clr-namespace:CanBusSniffer.Models"
+             x:DataType="viewmodel:MainVm">
     <VerticalStackLayout>
 
-        <Button Text="Blue" HorizontalOptions="End" Command="{Binding OpenBluetoothMenueCommand}" />
+        <Button Text="Blue" HorizontalOptions="End" Command="{Binding OpenBluetoothMenuCommand}" />
 
         <CollectionView ItemsSource="{Binding CanFrames}">
             <CollectionView.ItemsLayout>

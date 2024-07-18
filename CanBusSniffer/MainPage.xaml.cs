@@ -1,15 +1,14 @@
 ﻿using CanBusSniffer.ViewModels;
 using CanBusSniffer.Views;
 
-namespace CanBusSniffer
+namespace CanBusSniffer;
+
+public partial class MainPage : ContentPage
 {
-    public partial class MainPage : ContentPage
+    public MainPage(MainVm mainVm, MainCv mainCv)
     {
-        public MainPage(MainVM mainVM, MainCV mainCV)
-        {
-            InitializeComponent();
-            BindingContext = mainVM;
-            Content = mainCV;
-        }
+        InitializeComponent();
+        BindingContext = mainVm;
+        Content = mainCv;
     }
 }

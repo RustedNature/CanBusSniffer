@@ -1,8 +1,8 @@
 namespace CanBusSniffer.Views;
 
-public partial class MainCV : ContentView
+public partial class MainCv : ContentView
 {
-    public MainCV()
+    public MainCv()
     {
         InitializeComponent();
     }
