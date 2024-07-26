@@ -1,4 +1,5 @@
 ﻿using System.Collections.ObjectModel;
+using System.Diagnostics;
 using CanBusSniffer.Models;
 using CanBusSniffer.Service;
 using CanBusSniffer.Views;
@@ -17,15 +18,25 @@ public partial class MainVm : ObservableObject
         BluetoothService.CanFrameBatchParsed += OnCanFrameParsed;
     }
 
-    private BluetoothService BluetoothService { get; set; }
+    private BluetoothService BluetoothService { get; }
 
     private void OnCanFrameParsed(object? sender, List<CanFrame> frames)
     {
-        // Update the UI thread in batches
-        MainThread.BeginInvokeOnMainThread(() =>
+        foreach (var frame in frames)
         {
-            foreach (var frame in frames) CanFrames.Add(frame);
-        });
+            if (!CanFrames.Contains(frame))
+            {
+                CanFrames.Add(frame);
+                Debug.WriteLine($"{frame.FrameId} is not in, added frame");
+            }
+            else
+            {
+                CanFrames[CanFrames.IndexOf(frame)] = frame;
+                Debug.WriteLine($"{frame.FrameId} is already in, updated frame");
+            }
+        }
+
+        Debug.WriteLine($"List holds {CanFrames.Count} items");
     }
 
 
