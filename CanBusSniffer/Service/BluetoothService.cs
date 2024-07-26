@@ -68,7 +68,7 @@ public class BluetoothService
 
     private async Task StopReceivingData()
     {
-        await Characteristic.StopUpdatesAsync();
+        await Characteristic!.StopUpdatesAsync();
     }
 
     private async Task CloseConnection()
@@ -160,29 +160,15 @@ public class BluetoothService
         {
             var receivedData = Encoding.UTF8.GetString(e.Characteristic.Value);
             DataReceived?.Invoke(this, receivedData);
-            ParseCanFrame(receivedData);
+            lock (_batchLock)
+            {
+                CanFrameParser.ParseCanFrame(receivedData, _canFrameBatch);
+            }
         };
 
         await Characteristic.StartUpdatesAsync();
     }
 
-    private void ParseCanFrame(string frameData)
-    {
-        try
-        {
-            var frame = JsonConvert.DeserializeObject<CanFrame>(frameData)!;
-            Debug.WriteLine($"Successfully parsed: {frame}");
-            lock (_batchLock)
-            {
-                _canFrameBatch.Add(frame);
-            }
-        }
-        catch (Exception e)
-        {
-            Debug.WriteLine($"Error parsing CAN frame: {e.Message}");
-            Debug.WriteLine($"Stack trace: {e.StackTrace}");
-        }
-    }
 
     private async void Cleanup()
     {
