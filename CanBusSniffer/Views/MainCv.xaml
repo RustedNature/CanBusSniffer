@@ -1,26 +1,49 @@
-<?xml version="1.0" encoding="utf-8"?>
-
 <ContentView xmlns="http://schemas.microsoft.com/dotnet/2021/maui"
              xmlns:x="http://schemas.microsoft.com/winfx/2009/xaml"
              x:Class="CanBusSniffer.Views.MainCv"
              xmlns:viewmodel="clr-namespace:CanBusSniffer.ViewModels"
-             xmlns:m="clr-namespace:CanBusSniffer.Models"
+             xmlns:models="clr-namespace:CanBusSniffer.Models"
              x:DataType="viewmodel:MainVm">
-    <VerticalStackLayout>
+    <Grid RowDefinitions="Auto,Auto,*">
+        <Button Grid.Row="0"
+                Text="Bluetooth"
+                Command="{Binding OpenBluetoothMenuCommand}"
+                Margin="5"
+                HorizontalOptions="End" />
 
-        <Button Text="Blue" HorizontalOptions="End" Command="{Binding OpenBluetoothMenuCommand}" />
+        <!-- Header Row -->
+        <Grid Grid.Row="1" ColumnDefinitions="2*,*,*,*,*,*,*,*,*,*" Padding="5" BackgroundColor="LightGray">
+            <Label Text="Frame ID" Grid.Column="0" FontAttributes="Bold" />
+            <Label Text="D0" Grid.Column="1" FontAttributes="Bold" />
+            <Label Text="D1" Grid.Column="2" FontAttributes="Bold" />
+            <Label Text="D2" Grid.Column="3" FontAttributes="Bold" />
+            <Label Text="D3" Grid.Column="4" FontAttributes="Bold" />
+            <Label Text="D4" Grid.Column="5" FontAttributes="Bold" />
+            <Label Text="D5" Grid.Column="6" FontAttributes="Bold" />
+            <Label Text="D6" Grid.Column="7" FontAttributes="Bold" />
+            <Label Text="D7" Grid.Column="8" FontAttributes="Bold" />
+            <Label Text="Len" Grid.Column="9" FontAttributes="Bold" />
+        </Grid>
 
-        <CollectionView ItemsSource="{Binding CanFrames}">
-            <CollectionView.ItemsLayout>
-                <LinearItemsLayout ItemSpacing="10" Orientation="Vertical" />
-            </CollectionView.ItemsLayout>
-            <CollectionView.ItemTemplate>
-                <DataTemplate x:DataType="m:CanFrame">
-                    <StackLayout>
-                        <Label Text="{Binding FrameID, StringFormat='0x{0:X}'}" TextColor="AntiqueWhite" />
-                    </StackLayout>
-                </DataTemplate>
-            </CollectionView.ItemTemplate>
-        </CollectionView>
-    </VerticalStackLayout>
+        <ScrollView Grid.Row="2" VerticalScrollBarVisibility="Default">
+            <CollectionView ItemsSource="{Binding CanFrames}">
+                <CollectionView.ItemTemplate>
+                    <DataTemplate x:DataType="models:CanFrame">
+                        <Grid ColumnDefinitions="2*,*,*,*,*,*,*,*,*,*" Padding="5">
+                            <Label Text="{Binding FrameId, StringFormat='0x{0:X3}'}" Grid.Column="0" />
+                            <Label Text="{Binding Data[0], StringFormat='{0:X2}'}" Grid.Column="1" />
+                            <Label Text="{Binding Data[1], StringFormat='{0:X2}'}" Grid.Column="2" />
+                            <Label Text="{Binding Data[2], StringFormat='{0:X2}'}" Grid.Column="3" />
+                            <Label Text="{Binding Data[3], StringFormat='{0:X2}'}" Grid.Column="4" />
+                            <Label Text="{Binding Data[4], StringFormat='{0:X2}'}" Grid.Column="5" />
+                            <Label Text="{Binding Data[5], StringFormat='{0:X2}'}" Grid.Column="6" />
+                            <Label Text="{Binding Data[6], StringFormat='{0:X2}'}" Grid.Column="7" />
+                            <Label Text="{Binding Data[7], StringFormat='{0:X2}'}" Grid.Column="8" />
+                            <Label Text="{Binding DataLengthContent}" Grid.Column="9" />
+                        </Grid>
+                    </DataTemplate>
+                </CollectionView.ItemTemplate>
+            </CollectionView>
+        </ScrollView>
+    </Grid>
 </ContentView>
