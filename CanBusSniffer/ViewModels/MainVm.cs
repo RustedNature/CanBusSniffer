@@ -22,21 +22,34 @@ public partial class MainVm : ObservableObject
 
     private void OnCanFrameParsed(object? sender, List<CanFrame> frames)
     {
-        foreach (var frame in frames)
+        MainThread.BeginInvokeOnMainThread(() =>
         {
-            if (!CanFrames.Contains(frame))
+            foreach (var frame in frames)
             {
-                CanFrames.Add(frame);
-                Debug.WriteLine($"{frame.FrameId} is not in, added frame");
+                if (!CanFrames.Contains(frame))
+                {
+#if DEBUG
+                    if (CanFrames.Count >= 500)
+                    {
+                        continue;
+                    }
+#endif
+                    CanFrames.Add(frame);
+                    Debug.WriteLine($"{frame.FrameId} is not in, added frame");
+                }
+                else
+                {
+                    var index = CanFrames.IndexOf(frame);
+                    
+                    if (index == -1) continue;
+                    
+                    CanFrames[index] = frame;
+                    Debug.WriteLine($"{frame.FrameId} is already in, updated frame");
+                }
             }
-            else
-            {
-                CanFrames[CanFrames.IndexOf(frame)] = frame;
-                Debug.WriteLine($"{frame.FrameId} is already in, updated frame");
-            }
-        }
 
-        Debug.WriteLine($"List holds {CanFrames.Count} items");
+            Debug.WriteLine($"List holds {CanFrames.Count} items");
+        });
     }
 
 
